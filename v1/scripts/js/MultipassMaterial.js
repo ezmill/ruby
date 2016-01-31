@@ -17,23 +17,25 @@ function MultipassMaterial(RENDERER, SCENE, CAMERA, TEXTURE, SHADERS) {
     this.buffers = [];
     this.init = function() {
         this.buffers[0] = new RenderBuffer(this.shader1, false);
-        this.buffers[1] = new RenderBuffer(this.shader2, false);
-        this.buffers[2] = new RenderBuffer(this.shader3, false);
+        // this.buffers[1] = new RenderBuffer(this.shader2, false);
+        // this.buffers[2] = new RenderBuffer(this.shader3, false);
 
-        this.extraBuffer = new THREE.WebGLRenderTarget(renderSize.x, renderSize.y);
-        this.extraBuffer.texture.minFilter = THREE.LinearFilter;
-        this.extraBuffer.texture.magFilter = THREE.LinearFilter;
-        this.extraBuffer.texture.format = THREE.RGBAFormat;
+        // this.extraBuffer = new THREE.WebGLRenderTarget(renderSize.x, renderSize.y);
+        // this.extraBuffer.texture.minFilter = THREE.LinearFilter;
+        // this.extraBuffer.texture.magFilter = THREE.LinearFilter;
+        // this.extraBuffer.texture.format = THREE.RGBAFormat;
 
-        this.buffers[0].material.uniforms["BUF_A"].value = this.buffers[2].renderTarget;
-        this.buffers[0].material.uniforms["BUF_B"].value = this.buffers[1].renderTarget;
+        this.buffers[0].material.uniforms["texture"].value = this.texture;
+        // this.buffers[0].material.uniforms["BUF_A"].value = this.buffers[2].renderTarget;
+        // this.buffers[0].material.uniforms["BUF_B"].value = this.buffers[1].renderTarget;
+// 
+        // this.buffers[1].material.uniforms["INPUT"].value = this.texture;
+        // this.buffers[1].material.uniforms["BUF_A"].value = this.buffers[0].renderTarget;
+        // this.buffers[1].material.uniforms["BUF_B"].value = this.buffers[2].renderTarget;
 
-        this.buffers[1].material.uniforms["INPUT"].value = this.texture;
-        this.buffers[1].material.uniforms["BUF_A"].value = this.buffers[0].renderTarget;
-        this.buffers[1].material.uniforms["BUF_B"].value = this.buffers[2].renderTarget;
 
-
-        this.buffers[2].material.uniforms["BUF_B"].value = this.buffers[1].renderTarget;
+        // this.buffers[2].material.uniforms["BUF_B"].value = this.buffers[1].renderTarget;
+        // this.buffers[2].material.uniforms["BUF_B"].value = this.buffers[1].renderTarget;
     };
 
     this.resize = function() {
@@ -44,9 +46,9 @@ function MultipassMaterial(RENDERER, SCENE, CAMERA, TEXTURE, SHADERS) {
 
     this.update = function() {
         this.buffers[0].render(this.renderer, this.camera, true);
-        this.buffers[1].render(this.renderer, this.camera, true);
-        this.buffers[2].render(this.renderer, this.camera, true);
-        this.swapBuffers();
+        // this.buffers[1].render(this.renderer, this.camera, true);
+        // this.buffers[2].render(this.renderer, this.camera, true);
+        // this.swapBuffers();
 
     };
     this.swapBuffers = function() {
@@ -65,7 +67,7 @@ function MultipassMaterial(RENDERER, SCENE, CAMERA, TEXTURE, SHADERS) {
 
         // this.buffers[1].material.uniforms["INPUT"].value = this.texture;
         // this.buffers[1].material.uniforms["BUF_A"].value = this.buffers[0].renderTarget;
-        this.buffers[1].material.uniforms["BUF_B"].value = this.buffers[2].renderTarget;
+        // this.buffers[1].material.uniforms["BUF_B"].value = this.buffers[2].renderTarget;
 
         // this.buffers[2].material.uniforms["BUF_B"].value = this.buffers[1].renderTarget;
     };

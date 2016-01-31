@@ -9,7 +9,7 @@ var RefractionShader = function(){
         "time": { type: "f", value: 0.0 },
         "noiseScale":{type: "f", value:0.0},
         "noiseDetail":{type: "f", value:0.0},
-        "refractionRatio":{type: "f", value:1.0},
+        "refractionRatio":{type: "f", value:0.75},
         "diffuse":{type: "v3", value:new THREE.Vector3(1.0,1.0,1.0)},
         "reflectivity":{type: "f", value:1.0},
         "mouse":{type: "v2", value:null}
@@ -41,7 +41,7 @@ var RefractionShader = function(){
             "   float depth = ( color.r + color.g + color.b ) / 3.0;",
             "   float z = ( depth*2.0 - 1.0 ) * (4500.0 - 800.0) + 800.0;",
 
-            "   vec3 pos = vec3(position.x, position.y, z*0.05);",
+            "   vec3 pos = vec3(position.x, position.y, z*0.1);",
             // "   vec3 pos = vec3(position.x, position.y, sin(time+uv.x)*z*0.1);",
             // "   vec3 pos = vec3(position.x, position.y, position.z + sin(time*10.0 + position.x*0.1)*100.0);",
             // "   vec3 pos = vec3(position.x, position.y, z*sin(time*10.0 + z)*0.1);",
@@ -51,8 +51,8 @@ var RefractionShader = function(){
             "   vec4 worldPosition = modelMatrix * vec4( pos, 1.0 );    ",
             "   vec3 worldNormal = transformDirection( objectNormal, modelMatrix );",
             "   vec3 cameraToVertex = normalize( worldPosition.xyz - cameraPosition );",
-            // "    vReflect = refract( cameraToVertex, worldNormal, refractionRatio );",
-            "    vReflect = refract( cameraToVertex, worldNormal, (mouse.x*0.5 + 0.5)*2.0 );",
+            "    vReflect = refract( cameraToVertex, worldNormal, refractionRatio );",
+            // "    vReflect = refract( cameraToVertex, worldNormal, (mouse.x*0.5 + 0.5)*2.0 );",
             // "   vReflect = reflect( cameraToVertex, worldNormal );",
 
             "}"
@@ -448,4 +448,70 @@ var DifferencingShader = function(){
     
     ].join("\n")
     
+}
+var WarpShader = function(){
+        this.uniforms = THREE.UniformsUtils.merge([
+            {
+                "texture"  : { type: "t", value: null },
+                "mouse"  : { type: "v2", value: null },
+                "resolution"  : { type: "v2", value: null },
+                "time"  : { type: "f", value: null },
+            }
+        ]);
+
+        this.vertexShader = [
+
+            "varying vec2 vUv;",
+            "void main() {",
+            "    vUv = uv;",
+            "    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+            "}"
+        
+        ].join("\n");
+        
+        this.fragmentShader = [
+            
+            "uniform sampler2D texture;",
+            "uniform vec2 resolution;",
+            "uniform vec2 mouse;",
+            "uniform float time;",
+            "varying vec2 vUv;",
+
+            "float rand(vec2 p)",
+            "{",
+            "    vec2 n = floor(p/2.0);",
+            "     return fract(cos(dot(n,vec2(48.233,39.645)))*375.42); ",
+            "}",
+            "float srand(vec2 p)",
+            "{",
+            "     vec2 f = floor(p);",
+            "    vec2 s = smoothstep(vec2(0.0),vec2(1.0),fract(p));",
+            "    ",
+            "    return mix(mix(rand(f),rand(f+vec2(1.0,0.0)),s.x),",
+            "           mix(rand(f+vec2(0.0,1.0)),rand(f+vec2(1.0,1.0)),s.x),s.y);",
+            "}",
+            "float noise(vec2 p)",
+            "{",
+            "     float total = srand(p/128.0)*0.5+srand(p/64.0)*0.35+srand(p/32.0)*0.1+srand(p/16.0)*0.05;",
+            "    return total;",
+            "}",
+
+            "void main()",
+            "{",
+            "    float t = time;",
+            "    vec2 warp = vec2(noise(gl_FragCoord.xy+t)+noise(gl_FragCoord.xy*0.5+t*3.5),",
+            "                     noise(gl_FragCoord.xy+128.0-t)+noise(gl_FragCoord.xy*0.6-t*2.5))*0.5-0.25;",
+            // "    vec2 uv = gl_FragCoord.xy / resolution.xy+warp;",
+            "    vec2 mW = warp*vec2(-1.0 * mouse);",
+            "    vec2 uv = vUv+mW*sin(time);",
+            "    vec4 look = texture2D(texture,uv);",
+            "    vec2 offs = vec2(look.y-look.x,look.w-look.z)*vec2(mouse.x*uv.x/10.0, mouse.y*uv.y/10.0);",
+            "    vec2 coord = offs+vUv;",
+            "    vec4 repos = texture2D(texture, uv);",
+                "gl_FragColor = vec4(repos.rgb,1.0);",
+            "}"
+
+
+        
+        ].join("\n");
 }

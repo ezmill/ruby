@@ -29,13 +29,14 @@ var urls = [
 video = document.createElement("video");
 video.src = PATH + "textures/rubyfifths.mp4";
 video.load();
-video.addEventListener("canplaythrough", function(){
+// video.addEventListener("canplaythrough", function(){
     video.play();
-});
+// });
 // video.play();
 video.loop = true;
 
 var texture = new THREE.Texture(video);
+texture.minFilter = texture.magFilter = THREE.LinearFilter;
 var texturePlanes = [];
 // var testCube = testCubeLoader.load(urls, function(){
     init();    
@@ -56,7 +57,7 @@ function init() {
     // camera = new THREE.Camera();
     camera = new THREE.OrthographicCamera( renderSize.x / - 2, renderSize.x / 2, renderSize.y / 2, renderSize.y / - 2, -100000, 100000 );
     // camera = new THREE.PerspectiveCamera( 45, renderSize.x/renderSize.y, 0.001, 100000 );
-    camera.position.z = 1800;
+    camera.position.z = 1000;
     // camera.position.z = 1629.0124999999796;
     // camera.position.z = 1547.5618749999876;
     camera2 = new THREE.Camera();
@@ -108,12 +109,13 @@ function createScreensaver(){
 
 function createMultipassMaterial(){
     shaders = [
-        new AShader(),
-        new BShader(),
-        new OUTPUTShader(),
+        // new AShader(),
+        // new BShader(),
+        // new OUTPUTShader(),
+        new WarpShader()
     ]
     uniforms = {
-        "FRAME": 0.0,
+        // "FRAME": 0.0,
         "mouse": mouse,
         "resolution": renderSize,
         "time": 0.0
@@ -122,10 +124,10 @@ function createMultipassMaterial(){
     mMaterial.init();
     mMaterial.setUniforms(uniforms);
 
-    geometry = new THREE.PlaneGeometry(renderSize.x*3.0, renderSize.y*3.0);
+    geometry = new THREE.PlaneGeometry(renderSize.x*2.0, renderSize.y*2.0);
     material = new THREE.MeshBasicMaterial({
         map: texture,
-        // //map: mMaterial.buffers[2].renderTarget,
+        // map: mMaterial.buffers[0].renderTarget,
         side: THREE.DoubleSide
     })
     mesh = new THREE.Mesh(geometry, material);
@@ -135,8 +137,8 @@ function createMultipassMaterial(){
     // texturePlanes[i] = new TexturePlane(scene, camera, renderer, textures[i], Math.random())
         // texturePlanes[i].init();
     // }
-    // screensaver.refractionPlaneMaterial.uniforms["map"].value = mMaterial.buffers[2].renderTarget;
-    screensaver.refractionPlaneMaterial.uniforms["map"].value = texture;
+    screensaver.refractionPlaneMaterial.uniforms["map"].value = mMaterial.buffers[0].renderTarget;
+    // screensaver.refractionPlaneMaterial.uniforms["map"].value = texture;
 
     animate();
 }
@@ -174,8 +176,8 @@ function draw() {
 
     // screensaver.refractionPlaneMaterial.uniforms["map"].value = mMaterial.buffers[2].renderTarget;
 
-    // mMaterial.update();
-    // mMaterial.setUniforms(uniforms);
+    mMaterial.update();
+    mMaterial.setUniforms(uniforms);
 
     renderer.render( scene, camera );
 
